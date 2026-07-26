@@ -1,58 +1,186 @@
-<h2><a href="https://leetcode.com/problems/valid-parentheses">Valid Parentheses</a></h2> <img src='https://img.shields.io/badge/Difficulty-Easy-brightgreen' alt='Difficulty: Easy' /><hr><p>Given a string <code>s</code> containing just the characters <code>&#39;(&#39;</code>, <code>&#39;)&#39;</code>, <code>&#39;{&#39;</code>, <code>&#39;}&#39;</code>, <code>&#39;[&#39;</code> and <code>&#39;]&#39;</code>, determine if the input string is valid.</p>
+# Valid Parentheses
 
-<p>An input string is valid if:</p>
+## Problem Statement
 
-<ol>
-	<li>Open brackets must be closed by the same type of brackets.</li>
-	<li>Open brackets must be closed in the correct order.</li>
-	<li>Every close bracket has a corresponding open bracket of the same type.</li>
-</ol>
+Given a string `s` containing just the characters:
 
-<p>&nbsp;</p>
-<p><strong class="example">Example 1:</strong></p>
+- '('
+- ')'
+- '{'
+- '}'
+- '['
+- ']'
 
-<div class="example-block">
-<p><strong>Input:</strong> <span class="example-io">s = &quot;()&quot;</span></p>
+Determine if the input string is valid.
 
-<p><strong>Output:</strong> <span class="example-io">true</span></p>
-</div>
+A string is valid if:
 
-<p><strong class="example">Example 2:</strong></p>
+1. Every opening bracket has a corresponding closing bracket.
+2. Brackets close in the correct order.
+3. Every closing bracket matches the most recent unmatched opening bracket.
 
-<div class="example-block">
-<p><strong>Input:</strong> <span class="example-io">s = &quot;()[]{}&quot;</span></p>
+---
 
-<p><strong>Output:</strong> <span class="example-io">true</span></p>
-</div>
+## Examples
 
-<p><strong class="example">Example 3:</strong></p>
+### Example 1
 
-<div class="example-block">
-<p><strong>Input:</strong> <span class="example-io">s = &quot;(]&quot;</span></p>
+Input:
+```
+s = "()"
+```
 
-<p><strong>Output:</strong> <span class="example-io">false</span></p>
-</div>
+Output:
+```
+true
+```
 
-<p><strong class="example">Example 4:</strong></p>
+---
 
-<div class="example-block">
-<p><strong>Input:</strong> <span class="example-io">s = &quot;([])&quot;</span></p>
+### Example 2
 
-<p><strong>Output:</strong> <span class="example-io">true</span></p>
-</div>
+Input:
+```
+s = "()[]{}"
+```
 
-<p><strong class="example">Example 5:</strong></p>
+Output:
+```
+true
+```
 
-<div class="example-block">
-<p><strong>Input:</strong> <span class="example-io">s = &quot;([)]&quot;</span></p>
+---
 
-<p><strong>Output:</strong> <span class="example-io">false</span></p>
-</div>
+### Example 3
 
-<p>&nbsp;</p>
-<p><strong>Constraints:</strong></p>
+Input:
+```
+s = "(]"
+```
 
-<ul>
-	<li><code>1 &lt;= s.length &lt;= 10<sup>4</sup></code></li>
-	<li><code>s</code> consists of parentheses only <code>&#39;()[]{}&#39;</code>.</li>
-</ul>
+Output:
+```
+false
+```
+
+---
+
+### Example 4
+
+Input:
+```
+s = "([)]"
+```
+
+Output:
+```
+false
+```
+
+---
+
+### Example 5
+
+Input:
+```
+s = "{[]}"
+```
+
+Output:
+```
+true
+```
+
+---
+
+## Intuition
+
+The latest opening bracket must always be matched first.
+
+This follows the **Last In, First Out (LIFO)** principle, making a **Stack** the ideal data structure.
+
+### Thought Process
+
+- Whenever an opening bracket is encountered, push it onto the stack.
+- Whenever a closing bracket appears:
+  - If the stack is empty, the string is invalid.
+  - Pop the top element.
+  - Check whether it matches the corresponding opening bracket.
+- After processing the entire string:
+  - If the stack is empty, every opening bracket found a matching closing bracket.
+  - Otherwise, the string is invalid.
+
+---
+
+## Algorithm
+
+1. Create an empty stack.
+2. Traverse each character of the string.
+3. If it is an opening bracket, push it.
+4. Otherwise:
+   - If the stack is empty, return `false`.
+   - Pop the top.
+   - Verify the popped bracket matches the current closing bracket.
+5. After traversal, return `stack.isEmpty()`.
+
+---
+
+## Java Solution
+
+```java
+import java.util.Stack;
+
+class Solution {
+    public boolean isValid(String s) {
+
+        Stack<Character> stack = new Stack<>();
+
+        for(char ch : s.toCharArray()) {
+
+            if(ch == '(' || ch == '{' || ch == '[') {
+                stack.push(ch);
+            }
+            else {
+
+                if(stack.isEmpty())
+                    return false;
+
+                char top = stack.pop();
+
+                if(ch == ')' && top != '(')
+                    return false;
+
+                if(ch == '}' && top != '{')
+                    return false;
+
+                if(ch == ']' && top != '[')
+                    return false;
+            }
+        }
+
+        return stack.isEmpty();
+    }
+}
+```
+
+---
+
+## Complexity Analysis
+
+- **Time Complexity:** `O(n)`  
+  Each character is pushed and popped at most once.
+
+- **Space Complexity:** `O(n)`  
+  In the worst case, all opening brackets are stored in the stack.
+
+---
+
+## Key Takeaways
+
+- Matching symbols → **Stack**
+- Nested structures → **Stack**
+- Latest opening should close first → **LIFO**
+- Always check:
+  - Empty stack before popping.
+  - Matching bracket type.
+  - Stack is empty at the end.
