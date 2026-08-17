@@ -402,78 +402,92 @@ This ensures that equal values are assigned consistently to only one occurrence.
 # Java Solution
 
 ```java
-import java.util.*;
-
+907. Sum of Subarray Minimums
+[3, 1, 2, 4]
+17
 class Solution {
     public int sumSubarrayMins(int[] arr) {
-
-        int n = arr.length;
-
-        int[] left = new int[n];
-        int[] right = new int[n];
-
+        int sum = 0;
+        for (int i = 0; i < arr.length; i = i + 1) {
+            // 3 1 2 
+            //     i
+            //     j
+            // sum = 9
+            // min = 2
+            // T: O(n^2), S: O(1)
+            int min = Integer.MAX_VALUE;
+            for (int j = i; j < arr.length; j = j + 1) {
+                min = Math.min(min, arr[j]);
+                sum = (int)(((long)sum + min) % (1000000007));
+            }
+        }
+        return sum;
+    }
+}
+class Solution {
+    public int sumSubarrayMins(int[] arr) {
+        int[] nsei = new int[arr.length];
+        int[] psei = new int[arr.length];
+        for (int i = 0; i < arr.length; i = i + 1) {
+            nsei[i] = arr.length;
+            psei[i] = -1;
+        }
+        //   3 2 1
+        // n 3 3 3
+        // p * * *
+        // T: O(n), S: O(n)
         Stack<Integer> stack = new Stack<>();
-
-        // --------------------------------
-        // Find Previous Smaller Element
-        // --------------------------------
-
-        for (int i = 0; i < n; i++) {
-
-            while (!stack.isEmpty() &&
-                   arr[stack.peek()] > arr[i]) {
-
-                stack.pop();
+        for (int i = 0; i < arr.length; i = i + 1) {
+            while (true) {
+                if (stack.isEmpty()) {
+                    stack.push(i);
+                    break;
+                }
+                int idx = stack.peek();
+                if (arr[i] <= arr[idx]) {
+                    nsei[idx] = i;
+                    stack.pop();
+                } else {
+                    stack.push(i);
+                    break;
+                }
             }
-
-            if (stack.isEmpty()) {
-                left[i] = i + 1;
-            } else {
-                left[i] = i - stack.peek();
-            }
-
-            stack.push(i);
         }
-
         stack.clear();
-
-        // --------------------------------
-        // Find Next Smaller Element
-        // --------------------------------
-
-        for (int i = n - 1; i >= 0; i--) {
-
-            while (!stack.isEmpty() &&
-                   arr[stack.peek()] >= arr[i]) {
-
-                stack.pop();
+        for (int i = arr.length - 1; i >= 0; i = i - 1) {
+            while (true) {
+                if (stack.isEmpty()) {
+                    stack.push(i);
+                    break;
+                }
+                int idx = stack.peek();
+                if (arr[i] < arr[idx]) {
+                    psei[idx] = i;
+                    stack.pop();
+                } else {
+                    stack.push(i);
+                    break;
+                }
             }
-
-            if (stack.isEmpty()) {
-                right[i] = n - i;
-            } else {
-                right[i] = stack.peek() - i;
-            }
-
-            stack.push(i);
         }
-
-        // --------------------------------
-        // Calculate Answer
-        // --------------------------------
-
-        long answer = 0;
-        int MOD = 1_000_000_007;
-
-        for (int i = 0; i < n; i++) {
-
-            long contribution =
-                    (long) arr[i] * left[i] * right[i];
-
-            answer = (answer + contribution) % MOD;
+        //   0 1 2
+        //   3 1 2
+        //  
+        //.      i
+        // n 1 3 3
+        // p * * 1
+        // 1 * 1 * 2
+        // sum = 3 + 4 + 2 = 9
+        // 2 * 2 = 4
+        long sum = 0;
+        for (int i = 0; i < arr.length; i = i + 1) {
+            int leftBoundary = i - psei[i];
+            int rightBoundary = nsei[i] - i;
+            long contrib = (leftBoundary * rightBoundary) % 1000000007;
+            contrib = (contrib * arr[i]) % 1000000007;
+            sum = (sum + contrib) % 1000000007;
         }
-
-        return (int) answer;
+        return (int) sum;
     }
 }
 ```
