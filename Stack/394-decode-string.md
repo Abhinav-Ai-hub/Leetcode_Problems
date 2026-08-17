@@ -366,51 +366,43 @@ Add it to the current string.
 ## Java Solution
 
 ```java
-import java.util.Stack;
-
 class Solution {
     public String decodeString(String s) {
 
-        Stack<Integer> countStack = new Stack<>();
-        Stack<String> stringStack = new Stack<>();
+        Stack<Integer> number = new Stack<>();
+        Stack<String> prevstring = new Stack<>();
 
-        int number = 0;
         String current = "";
+        int num = 0;
 
-        for (char ch : s.toCharArray()) {
+        for (int i = 0; i < s.length(); i++) {
 
-            // Build the number
+            char ch = s.charAt(i);
+
             if (Character.isDigit(ch)) {
-                number = number * 10 + (ch - '0');
-            }
 
-            // Save current state
+                num = num * 10 + (ch - '0');
+
+            } 
             else if (ch == '[') {
 
-                countStack.push(number);
-                stringStack.push(current);
+                number.push(num);
+                prevstring.push(current);
 
-                number = 0;
+                num = 0;
                 current = "";
-            }
 
-            // Decode current bracket
+            } 
             else if (ch == ']') {
 
-                int count = countStack.pop();
-                String previous = stringStack.pop();
+                int repeat = number.pop();
+                String previous = prevstring.pop();
 
-                StringBuilder temp = new StringBuilder(previous);
+                current = previous + current.repeat(repeat);
 
-                for (int i = 0; i < count; i++) {
-                    temp.append(current);
-                }
-
-                current = temp.toString();
-            }
-
-            // Add character
+            } 
             else {
+
                 current += ch;
             }
         }
