@@ -1,59 +1,25 @@
 # LeetCode 70: Climbing Stairs
 
-## Problem Statement
+## 📌 Problem Description
 
-You are climbing a staircase.
+You are climbing a staircase. It takes `n` steps to reach the top.
 
-It takes `n` steps to reach the top.
+Each time you can climb either:
 
-Each time you can either climb:
+* `1` step
+* `2` steps
 
-- `1` step
-- `2` steps
+Given an integer `n`, return the number of distinct ways you can climb to the top.
 
-Return the number of distinct ways you can climb to the top.
+### Example
 
----
-
-## Example 1
-
-### Input
-
-```text
-n = 2
-```
-
-### Output
-
-```text
-2
-```
-
-### Explanation
-
-There are two ways:
-
-```text
-1 + 1
-```
-
-or
-
-```text
-2
-```
-
----
-
-## Example 2
-
-### Input
+**Input:**
 
 ```text
 n = 3
 ```
 
-### Output
+**Output:**
 
 ```text
 3
@@ -61,7 +27,7 @@ n = 3
 
 ### Explanation
 
-The three possible ways are:
+There are 3 ways to reach the top:
 
 ```text
 1 + 1 + 1
@@ -71,283 +37,353 @@ The three possible ways are:
 
 ---
 
-# Intuition
+# 💡 Intuition — How Do I Recognize Recursion?
 
-The most important question is:
+The key observation is:
 
-> How can we reach step `n`?
+> To reach step `n`, the last move must either be `1` step or `2` steps.
 
-There are only two possibilities.
+So there are only two possibilities:
 
-### Possibility 1
+### Case 1: Last move is 1 step
 
-We came from step `n - 1` by taking:
+Before taking the final 1 step, we must be at:
 
 ```text
-1 step
+n - 1
 ```
 
-### Possibility 2
-
-We came from step `n - 2` by taking:
+The number of ways to reach there is:
 
 ```text
-2 steps
+ways(n - 1)
+```
+
+### Case 2: Last move is 2 steps
+
+Before taking the final 2 steps, we must be at:
+
+```text
+n - 2
+```
+
+The number of ways to reach there is:
+
+```text
+ways(n - 2)
 ```
 
 Therefore:
 
 ```text
-ways[n] = ways[n - 1] + ways[n - 2]
+ways(n) = ways(n - 1) + ways(n - 2)
 ```
 
-This is the recurrence relation.
+This is a recursive pattern because the answer for `n` depends on smaller versions of the **same problem**.
 
 ---
 
-# Why Dynamic Programming?
+# 🧠 Recursive Thinking
 
-Notice that to calculate:
+Think from the destination backwards.
 
-```text
-ways[5]
-```
-
-we need:
+For example:
 
 ```text
-ways[4] + ways[3]
+n = 5
 ```
 
-And:
+The last move can be:
 
 ```text
-ways[4]
+5
+↑
+4 → +1
+3 → +2
 ```
 
-already depends on:
+Therefore:
 
 ```text
-ways[3] + ways[2]
+ways(5) = ways(4) + ways(3)
 ```
 
-So the same smaller problems are repeatedly used.
-
-Instead of calculating them again and again, we store their answers.
-
-This is the basic idea of:
+And each of those problems can be broken down again.
 
 ```text
-Dynamic Programming
+ways(5)
+├── ways(4)
+│   ├── ways(3)
+│   └── ways(2)
+│
+└── ways(3)
+    ├── ways(2)
+    └── ways(1)
 ```
+
+This naturally gives us recursion.
 
 ---
 
-# Recognition Trick
+# 🛑 Base Cases
 
-When you see:
+We need to stop the recursion at small values.
 
-```text
-Count the number of ways
-+
-Current state depends on previous states
-```
+### If `n = 1`
 
-think:
-
-```text
-Dynamic Programming
-```
-
-Here:
-
-```text
-dp[i] = number of ways to reach step i
-```
-
----
-
-# Base Cases
-
-For:
-
-```text
-n = 1
-```
-
-There is only:
+There is only one way:
 
 ```text
 1
 ```
 
-way.
-
-Therefore:
+So:
 
 ```text
-dp[1] = 1
+ways(1) = 1
 ```
 
-For:
+### If `n = 2`
 
-```text
-n = 2
-```
-
-There are:
+There are two ways:
 
 ```text
 1 + 1
 2
 ```
 
-Therefore:
-
-```text
-dp[2] = 2
-```
-
 So:
 
 ```text
-dp[1] = 1
-dp[2] = 2
-```
-
----
-
-# Recurrence Relation
-
-For every `i >= 3`:
-
-```text
-dp[i] = dp[i - 1] + dp[i - 2]
-```
-
-Why?
-
-Because the final move is either:
-
-```text
-1 step
-```
-
-or:
-
-```text
-2 steps
+ways(2) = 2
 ```
 
 Therefore:
 
-```text
-                 Step i
-                /       \
-          from i-1      from i-2
-             ↓             ↓
-          1 step        2 steps
-```
-
-So:
-
-```text
-dp[i] = dp[i-1] + dp[i-2]
+```java
+if (n <= 2) {
+    return n;
+}
 ```
 
 ---
 
-# Dry Run
+# 🔄 Recursive Formula
 
-Consider:
-
-```text
-n = 5
-```
-
-Start with:
+The complete recurrence is:
 
 ```text
-dp[1] = 1
-dp[2] = 2
+ways(n) = ways(n - 1) + ways(n - 2)
 ```
 
-### Step 3
-
-```text
-dp[3] = dp[2] + dp[1]
-
-      = 2 + 1
-
-      = 3
-```
-
-### Step 4
-
-```text
-dp[4] = dp[3] + dp[2]
-
-      = 3 + 2
-
-      = 5
-```
-
-### Step 5
-
-```text
-dp[5] = dp[4] + dp[3]
-
-      = 5 + 3
-
-      = 8
-```
-
-Therefore:
-
-```text
-Answer = 8
-```
+This is exactly the Fibonacci pattern.
 
 ---
 
-# DP Table
-
-For `n = 5`:
-
-| Step | Number of Ways |
-|------|----------------|
-| 1 | 1 |
-| 2 | 2 |
-| 3 | 3 |
-| 4 | 5 |
-| 5 | 8 |
-
-Pattern:
-
-```text
-1, 2, 3, 5, 8...
-```
-
----
-
-# Java Solution — DP Array
+# 💻 Java Solution — Recursion
 
 ```java
 class Solution {
+
+    public int climbStairs(int n) {
+
+        if (n <= 2) {
+            return n;
+        }
+
+        return climbStairs(n - 1) + climbStairs(n - 2);
+    }
+}
+```
+
+---
+
+# 🔍 Dry Run
+
+Suppose:
+
+```text
+n = 4
+```
+
+We calculate:
+
+```text
+climbStairs(4)
+```
+
+Since `4 > 2`:
+
+```text
+climbStairs(4)
+= climbStairs(3) + climbStairs(2)
+```
+
+Now:
+
+```text
+climbStairs(3)
+= climbStairs(2) + climbStairs(1)
+```
+
+Using the base cases:
+
+```text
+climbStairs(2) = 2
+climbStairs(1) = 1
+```
+
+Therefore:
+
+```text
+climbStairs(3) = 2 + 1
+               = 3
+```
+
+And:
+
+```text
+climbStairs(4) = 3 + 2
+               = 5
+```
+
+### Final Answer
+
+```text
+5
+```
+
+The five ways are:
+
+```text
+1 + 1 + 1 + 1
+1 + 1 + 2
+1 + 2 + 1
+2 + 1 + 1
+2 + 2
+```
+
+---
+
+# 🌳 Recursion Tree
+
+For `n = 5`:
+
+```text
+                    climbStairs(5)
+                   /              \
+          climbStairs(4)       climbStairs(3)
+           /        \            /        \
+     climbStairs(3) climbStairs(2) climbStairs(2) climbStairs(1)
+       /      \
+ climbStairs(2) climbStairs(1)
+```
+
+Notice something important:
+
+```text
+climbStairs(3)
+```
+
+is calculated multiple times.
+
+Similarly:
+
+```text
+climbStairs(2)
+```
+
+is also calculated multiple times.
+
+This is called **overlapping subproblems**.
+
+---
+
+# ⚠️ Problem With Simple Recursion
+
+Although the recursive solution is easy to understand, it is inefficient.
+
+For example:
+
+```text
+climbStairs(5)
+```
+
+calculates:
+
+```text
+climbStairs(3)
+```
+
+multiple times.
+
+As `n` becomes larger, the number of recursive calls grows very quickly.
+
+Therefore, the simple recursive solution has:
+
+### Time Complexity
+
+```text
+O(2^n)
+```
+
+### Space Complexity
+
+```text
+O(n)
+```
+
+The `O(n)` space comes from the recursion call stack.
+
+---
+
+# 🚀 Better Approach
+
+The recursive solution reveals an important DP pattern:
+
+```text
+ways(n) = ways(n - 1) + ways(n - 2)
+```
+
+We can store already calculated results using **memoization**.
+
+This changes the time complexity from:
+
+```text
+O(2^n)
+```
+
+to:
+
+```text
+O(n)
+```
+
+---
+
+# 💻 Java Solution — Recursion + Memoization
+
+```java
+class Solution {
+
     public int climbStairs(int n) {
 
         int[] dp = new int[n + 1];
 
-        dp[1] = 1;
+        return solve(n, dp);
+    }
 
-        if (n >= 2) {
-            dp[2] = 2;
+    private int solve(int n, int[] dp) {
+
+        if (n <= 2) {
+            return n;
         }
 
-        for (int i = 3; i <= n; i++) {
-
-            dp[i] = dp[i - 1] + dp[i - 2];
+        if (dp[n] != 0) {
+            return dp[n];
         }
+
+        dp[n] = solve(n - 1, dp) + solve(n - 2, dp);
 
         return dp[n];
     }
@@ -356,247 +392,146 @@ class Solution {
 
 ---
 
-# Space Optimization
+# 🧠 Why Memoization Works
 
-Look at the recurrence:
-
-```text
-dp[i] = dp[i - 1] + dp[i - 2]
-```
-
-To calculate `dp[i]`, we only need:
+Without memoization:
 
 ```text
-dp[i-1]
-dp[i-2]
+solve(5)
+├── solve(4)
+│   ├── solve(3)
+│   └── solve(2)
+│
+└── solve(3)
+    ├── solve(2)
+    └── solve(1)
 ```
 
-We don't need the entire array.
+`solve(3)` is calculated more than once.
 
-So instead of:
-
-```text
-dp[1]
-dp[2]
-dp[3]
-dp[4]
-dp[5]
-...
-```
-
-we can maintain only:
-
-```text
-prev2
-prev1
-current
-```
-
----
-
-# Optimized Java Solution
+With memoization:
 
 ```java
-class Solution {
-    public int climbStairs(int n) {
-
-        if (n <= 2) {
-            return n;
-        }
-
-        int prev2 = 1;
-        int prev1 = 2;
-
-        for (int i = 3; i <= n; i++) {
-
-            int current = prev1 + prev2;
-
-            prev2 = prev1;
-            prev1 = current;
-        }
-
-        return prev1;
-    }
+if (dp[n] != 0) {
+    return dp[n];
 }
 ```
 
----
-
-# Dry Run of Optimized Version
-
-For:
+Once we calculate:
 
 ```text
-n = 5
+dp[3] = 3
 ```
 
-Initially:
+we store it.
+
+The next time we need `solve(3)`, we simply return:
 
 ```text
-prev2 = 1
-prev1 = 2
+dp[3]
 ```
 
-### i = 3
-
-```text
-current = 2 + 1
-        = 3
-```
-
-Update:
-
-```text
-prev2 = 2
-prev1 = 3
-```
+instead of calculating it again.
 
 ---
 
-### i = 4
+# 📊 Complexity
+
+## Simple Recursion
 
 ```text
-current = 3 + 2
-        = 5
+Time:  O(2^n)
+Space: O(n)
 ```
 
-Update:
+## Recursion + Memoization
 
 ```text
-prev2 = 3
-prev1 = 5
+Time:  O(n)
+Space: O(n)
 ```
 
 ---
 
-### i = 5
+# 🎯 Key Takeaways
+
+The most important thought process is:
 
 ```text
-current = 5 + 3
-        = 8
+What can the last move be?
 ```
 
-Update:
+For this problem:
 
 ```text
-prev2 = 5
-prev1 = 8
-```
-
-Return:
-
-```text
-8
-```
-
----
-
-# Complexity Analysis
-
-## DP Array Approach
-
-### Time
-
-```text
-O(n)
-```
-
-We calculate every step once.
-
-### Space
-
-```text
-O(n)
-```
-
-Because we store the entire DP array.
-
----
-
-## Optimized Approach
-
-### Time
-
-```text
-O(n)
-```
-
-We still calculate each step once.
-
-### Space
-
-```text
-O(1)
-```
-
-We only store three variables.
-
----
-
-# Key Takeaways
-
-## Pattern Recognition
-
-When you see:
-
-```text
-Number of ways to reach a state
-```
-
-ask:
-
-> **Can I reach this state from a small number of previous states?**
-
-Here:
-
-```text
-step i
-  ↓
-from i-1 OR i-2
+Last move = 1 step
+        OR
+Last move = 2 steps
 ```
 
 Therefore:
 
 ```text
-dp[i] = dp[i-1] + dp[i-2]
+ways(n) = ways(n - 1) + ways(n - 2)
+```
+
+Whenever you see:
+
+* A problem that can be broken into smaller versions of itself
+* The same subproblem appearing repeatedly
+* A clear base case
+* A recurrence such as `f(n) = f(n-1) + f(n-2)`
+
+you should think:
+
+> **Recursion first → then check whether memoization/DP can optimize it.**
+
+---
+
+# 🔑 Pattern Recognition
+
+```text
+Problem
+   ↓
+Break into smaller same problems
+   ↓
+Define base case
+   ↓
+Write recurrence
+   ↓
+Recursion
+   ↓
+Notice repeated calculations
+   ↓
+Memoization / Dynamic Programming
+```
+
+For Climbing Stairs:
+
+```text
+climbStairs(n)
+        ↓
+climbStairs(n-1) + climbStairs(n-2)
+        ↓
+Repeated subproblems
+        ↓
+Memoization
+        ↓
+O(n) solution
 ```
 
 ---
 
-## Mental Model
+# ⭐ Final Mental Model
 
-Think of yourself standing at step `i`.
+Remember this one line:
 
-To reach it, your last jump must have been:
+> **To reach step `n`, I must come from either `n-1` or `n-2`.**
 
-```text
-      i
-     / \
-   i-1  i-2
-    ↓     ↓
-  +1     +2
-```
-
-So:
+Therefore:
 
 ```text
-ways(i) = ways(i-1) + ways(i-2)
+f(n) = f(n-1) + f(n-2)
 ```
 
----
-
-## Important Connection
-
-This produces the Fibonacci-like sequence:
-
-```text
-1, 2, 3, 5, 8, 13, 21...
-```
-
-But don't memorize it as "Fibonacci."
-
-Instead remember the reasoning:
-
-> **The final move can only be 1 or 2 steps, so count all ways to reach the two previous positions.**
-
-That thought process is what lets you recognize similar **Dynamic Programming** problems.
+That single observation gives us the entire recursive solution.
