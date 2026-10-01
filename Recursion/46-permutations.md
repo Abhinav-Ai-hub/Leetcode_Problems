@@ -331,6 +331,8 @@ class Solution {
         return ans;
     }
 }
+
+jab for loop end hojataa hain because i is not less than nums.length it means ki vo function complete hogya and it backpropagates basically return to its previous function call isiliye when we removed the second index i.e 3 from [1,2,3] we were left with [1,2] but now i was equal to 3 in the next for loop so we got exited from for loop so the control flows to previous recursive call i.e [1] vale pe now hmara ds ab [1,2] and freq [tick,tick,cross] now return hone ke badd coreesponding lines execute hoga resulting in [1] because of ds.remove and frq [tick,cross,cross] now for loop chalega but remeber for loop vhi se chalega jhan last uss ne choda tha that is i=1 pe choda to jab next iteration chalega to i=2 se start hoga and resulting in addition of last index of nums which is 3 so now the ds becomes [1,3] and freq[tick,cross,tick]
 ```
 
 ---
