@@ -1,50 +1,48 @@
+import java.util.*;
+
 class Solution {
 
     private void recurPermute(
         int[] nums,
-        int i,
         List<Integer> ds,
         List<List<Integer>> ans,
         boolean[] freq
     ) {
 
-        // We have checked all elements for this level
-        if (i == nums.length) {
-            return;
-        }
-
-        // Complete permutation
+        // Base case: permutation is complete
         if (ds.size() == nums.length) {
             ans.add(new ArrayList<>(ds));
             return;
         }
 
-        // Choice: nums[i] is free
-        if (!freq[i]) {
+        // Try every element
+        for (int i = 0; i < nums.length; i++) {
 
-            freq[i] = true;
-            ds.add(nums[i]);
+            // Check whether this index is already used
+            if (!freq[i]) {
 
-            // Move to the next recursion level
-            recurPermute(nums, 0, ds, ans, freq);
+                // Pick the element
+                freq[i] = true;
+                ds.add(nums[i]);
 
-            // Backtrack
-            ds.remove(ds.size() - 1);
-            freq[i] = false;
+                // Recursively build the remaining permutation
+                recurPermute(nums, ds, ans, freq);
+
+                // Backtrack: remove the element
+                ds.remove(ds.size() - 1);
+                freq[i] = false;
+            }
         }
-
-        // Instead of the for loop:
-        // i++ becomes another recursive call
-        recurPermute(nums, i + 1, ds, ans, freq);
     }
 
     public List<List<Integer>> permute(int[] nums) {
 
         List<List<Integer>> ans = new ArrayList<>();
         List<Integer> ds = new ArrayList<>();
+
         boolean[] freq = new boolean[nums.length];
 
-        recurPermute(nums, 0, ds, ans, freq);
+        recurPermute(nums, ds, ans, freq);
 
         return ans;
     }
