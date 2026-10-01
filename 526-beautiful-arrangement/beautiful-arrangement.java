@@ -7,12 +7,12 @@ class Solution {
     }
 
     private int backtrack(int pos, int n, boolean[] used) {
-
+ int count = 0;
         if(pos > n) {
             return 1;
         }
 
-        int count = 0;
+       
 
         for(int num = 1; num <= n; num++) {
 
