@@ -1,38 +1,29 @@
-# LeetCode 216: Combination Sum III
+# LeetCode 779: K-th Symbol in Grammar
 
 ## Problem Description
 
-Find all valid combinations of `k` numbers that add up to `n`, subject to the following conditions:
+We build a sequence of rows according to the following rules:
 
-* Only numbers from `1` to `9` can be used.
-* Each number can be used at most once.
-* Every combination must contain exactly `k` numbers.
-* The sum of the selected numbers must equal `n`.
+* Row 1 contains the symbol `0`.
+* Every `0` in the previous row becomes `01`.
+* Every `1` in the previous row becomes `10`.
 
-Return all valid combinations.
+Given two integers `n` and `k`, return the `k`-th symbol in row `n`.
 
-The order of the combinations does not matter.
+Positions are numbered starting from `1`.
 
 ### Example 1
 
 **Input:**
 
 ```text
-k = 3, n = 7
+n = 1, k = 1
 ```
 
 **Output:**
 
 ```text
-[[1,2,4]]
-```
-
-**Explanation:**
-
-The combination `[1,2,4]` contains exactly three distinct numbers, and their sum is:
-
-```text
-1 + 2 + 4 = 7
+0
 ```
 
 ### Example 2
@@ -40,426 +31,232 @@ The combination `[1,2,4]` contains exactly three distinct numbers, and their sum
 **Input:**
 
 ```text
-k = 3, n = 9
+n = 2, k = 2
 ```
 
 **Output:**
 
 ```text
-[[1,2,6],[1,3,5],[2,3,4]]
+1
 ```
 
 **Explanation:**
 
-Each combination contains exactly three distinct numbers whose sum is `9`.
-
-### Example 3
-
-**Input:**
-
-```text
-k = 4, n = 1
-```
-
-**Output:**
-
-```text
-[]
-```
-
-**Explanation:**
-
-It is impossible to select four distinct positive numbers from `1` to `9` whose sum is `1`.
+Row 2 is `01`, so its second symbol is `1`.
 
 ---
 
-## 1. Hint — How to Recognize Backtracking
+## 1. Hint — How to Recognize Recursion
 
-The problem asks us to generate every combination satisfying three conditions:
+The sequence is generated from the previous row:
 
-1. Select exactly `k` numbers.
-2. Use numbers only from `1` to `9`.
-3. Make their sum equal to `n`.
+```text
+Row 1: 0
+Row 2: 01
+Row 3: 0110
+Row 4: 01101001
+```
 
-This suggests backtracking because we need to explore different selections and keep only those that satisfy all the conditions.
+Instead of generating the entire row, we can determine which symbol in the previous row produced the symbol at position `k`.
 
-The pattern is:
+Every parent generates two children:
 
-**Choose → Explore → Undo**
+```text
+0 → 01
+1 → 10
+```
 
-We also need a starting index because combinations do not depend on the order of their elements.
+Therefore:
 
-For example, `[1,2,4]` and `[2,1,4]` represent the same combination.
+* The first child preserves the parent's symbol.
+* The second child is the opposite of the parent's symbol.
 
-By always selecting numbers in increasing order, we avoid generating duplicate combinations.
-
-### Pattern Recognition
-
-When you see:
-
-* Find all possible combinations.
-* Select exactly `k` elements.
-* The sum must equal a target.
-* Each candidate can be used only once.
-
-Think:
-
-**Backtracking + Starting Index + Target Sum + Pruning**
-
----
+This suggests **recursion using the parent-child relationship**.
 
 ## 2. Intuition
 
-Suppose:
+Each parent generates exactly two children.
+
+For a position `k`, its parent is located at:
 
 ```text
-k = 3
-n = 7
+parent position = ceil(k / 2)
 ```
 
-We need three distinct numbers whose sum is `7`.
+In Java:
 
-Start with:
-
-```text
-current = []
-target = 7
-start = 1
+```java
+(k + 1) / 2
 ```
 
-Choose `1`:
+We recursively find the parent's symbol in the previous row.
 
-```text
-current = [1]
-target = 6
-```
+Then:
 
-Choose `2`:
+* If `k` is odd, return the parent's symbol.
+* If `k` is even, return the opposite of the parent's symbol.
 
-```text
-current = [1,2]
-target = 4
-```
-
-Choose `4`:
-
-```text
-current = [1,2,4]
-target = 0
-```
-
-We have selected exactly three numbers, and the remaining target is zero.
-
-Therefore, `[1,2,4]` is a valid combination.
-
-The key idea is to subtract every selected number from the remaining target rather than repeatedly calculating the sum of the current combination.
-
----
+This avoids constructing the entire sequence.
 
 ## 3. Algorithm
 
-1. Create an empty result list.
-2. Start the recursive function from number `1`.
-3. Maintain a list called `current` to store the selected numbers.
-4. Maintain `target` as the remaining sum required.
-5. If `current.size() == k`, check whether `target == 0`.
-6. If both conditions are satisfied, add a copy of `current` to the result.
-7. Otherwise, iterate through candidates from `start` to `9`.
-8. Skip candidates greater than the remaining target.
-9. Choose a candidate by adding it to `current`.
-10. Recursively explore the remaining numbers using `i + 1` and `target - i`.
-11. Remove the selected candidate to backtrack.
-12. Return all valid combinations.
-
----
+1. If `n == 1`, return `0`.
+2. Calculate the parent position using `(k + 1) / 2`.
+3. Recursively find the parent's symbol in row `n - 1`.
+4. If `k` is odd, return the parent's symbol.
+5. Otherwise, return `1 - parent`.
 
 ## 4. Java Solution
 
 ```java
-import java.util.*;
-
 class Solution {
 
-    public List<List<Integer>> combinationSum3(int k, int n) {
+    public int kthGrammar(int n, int k) {
 
-        List<List<Integer>> result = new ArrayList<>();
-
-        generate(1, k, n, new ArrayList<>(), result);
-
-        return result;
-    }
-
-    private void generate(
-            int start,
-            int k,
-            int target,
-            List<Integer> current,
-            List<List<Integer>> result) {
-
-        // Exactly k numbers have been selected
-        if (current.size() == k) {
-
-            // Accept only combinations with the required sum
-            if (target == 0) {
-                result.add(new ArrayList<>(current));
-            }
-
-            return;
+        // Base case
+        if (n == 1) {
+            return 0;
         }
 
-        // Try available numbers from start to 9
-        for (int i = start; i <= 9 && i <= target; i++) {
+        // Find the parent symbol
+        int parent = kthGrammar(n - 1, (k + 1) / 2);
 
-            // Choose
-            current.add(i);
-
-            // Explore
-            generate(
-                i + 1,
-                k,
-                target - i,
-                current,
-                result
-            );
-
-            // Undo / Backtrack
-            current.remove(current.size() - 1);
+        // Odd position preserves the parent's symbol
+        if (k % 2 == 1) {
+            return parent;
         }
+
+        // Even position flips the parent's symbol
+        return 1 - parent;
     }
 }
 ```
 
----
+## 5. Code Explanation
 
-## 5. Understanding the Important Variables
-
-### `start`
-
-The smallest number that can be selected next.
+### Base Case
 
 ```java
-generate(i + 1, k, target - i, current, result);
+if (n == 1) {
+    return 0;
+}
 ```
 
-If we choose `3`, the next recursive call starts from `4`.
+Row 1 contains only the symbol `0`, so we return `0`.
 
-This prevents reusing numbers and avoids duplicate combinations.
-
-### `k`
-
-The required number of elements in each combination.
+### Find the Parent
 
 ```java
-current.size() == k
+int parent = kthGrammar(n - 1, (k + 1) / 2);
 ```
 
-When the current combination contains `k` elements, we stop extending that branch.
+Every parent produces two children.
 
-### `target`
-
-The sum still required to form a valid combination.
-
-Initially:
+For example, if `k = 5`:
 
 ```text
-target = n
+Parent position = (5 + 1) / 2
+                = 3
 ```
 
-After selecting a number:
+Therefore, the fifth symbol in the current row comes from the third symbol in the previous row.
 
-```text
-target = target - selectedNumber
-```
-
-When `target == 0` and exactly `k` numbers have been selected, the combination is valid.
-
-### `current`
-
-Stores the numbers selected in the current recursive path.
-
-For example:
-
-```text
-current = [1,2,4]
-```
-
-We add a copy to the result because `current` is modified during backtracking.
-
----
-
-## 6. Why Do We Use `i + 1`?
-
-The recursive call is:
+### Odd Position
 
 ```java
-generate(i + 1, k, target - i, current, result);
+if (k % 2 == 1) {
+    return parent;
+}
 ```
 
-Every number can be used at most once.
+Odd positions correspond to the first child, which preserves the parent's symbol.
 
-If we choose `2`, the next recursive call begins from `3`.
-
-Therefore, we cannot choose `2` again.
-
-It also ensures that numbers remain in increasing order.
-
-### Compare LC 39 and LC 216
-
-| Feature                            | LC 39: Combination Sum | LC 216: Combination Sum III |
-| ---------------------------------- | ---------------------- | --------------------------- |
-| Candidate numbers                  | Given in an array      | Fixed range from 1 to 9     |
-| Reuse candidates?                  | Yes                    | No                          |
-| Recursive index                    | `i`                    | `i + 1`                     |
-| Target sum                         | Yes                    | Yes                         |
-| Exact number of elements required? | No                     | Yes, exactly `k`            |
-
----
-
-## 7. Backtracking: Choose, Explore, Undo
+### Even Position
 
 ```java
-current.add(i);
-
-generate(
-    i + 1,
-    k,
-    target - i,
-    current,
-    result
-);
-
-current.remove(current.size() - 1);
+return 1 - parent;
 ```
 
-### Choose
-
-Add the selected number to the current combination.
-
-### Explore
-
-Recursively explore all possibilities using the remaining numbers.
-
-### Undo
-
-Remove the last selected number so that another candidate can be tried.
-
-This allows us to explore different combinations using the same list.
-
----
-
-## 8. Pruning
-
-Pruning means avoiding branches that cannot produce a valid answer.
-
-In this solution:
-
-```java
-for (int i = start; i <= 9 && i <= target; i++)
-```
-
-We only consider numbers that are no greater than the remaining target.
-
-For example, if:
+Even positions correspond to the second child, which flips the parent's symbol.
 
 ```text
-target = 3
+If parent = 0, child = 1.
+If parent = 1, child = 0.
 ```
 
-choosing `4` cannot lead to a valid combination because all selected numbers are positive.
+## 6. Dry Run
 
-Therefore, we do not explore that choice.
-
-Pruning reduces unnecessary recursive calls.
-
----
-
-## 9. Recursion Tree
-
-For `k = 3` and `n = 7`:
+Consider:
 
 ```text
-                         []
-                       target=7
-                          |
-                        Choose 1
-                          |
-                         [1]
-                       target=6
-                          |
-                        Choose 2
-                          |
-                        [1,2]
-                       target=4
-                      /       \
-                 Choose 3   Choose 4
-                    |          |
-                 [1,2,3]    [1,2,4]
-                 target=1   target=0
-                    |          |
-                 Invalid      Valid
+n = 4
+k = 5
 ```
 
-The combination `[1,2,4]` is accepted because it contains exactly three numbers and its sum equals `7`.
-
-The algorithm continues exploring the remaining branches to find every valid combination.
-
----
-
-## 10. Complexity Analysis
-
-There are only nine possible candidate numbers.
-
-Let `C` be the number of valid combinations.
-
-**Time Complexity:**
-
-A simple upper bound for exploring subsets is `O(2^9)`, excluding the cost of copying results.
-
-The output and copying cost is `O(k * C)`.
-
-**Auxiliary Space Complexity:**
-
-`O(k)` for the recursion stack and the current combination.
-
-**Output Space Complexity:**
-
-`O(k * C)` to store all valid combinations.
-
----
-
-## 11. Pattern Recognition Summary
-
-| Problem clue              | What to think                            |
-| ------------------------- | ---------------------------------------- |
-| Find all combinations     | Backtracking                             |
-| Exactly `k` elements      | Stop when `current.size() == k`          |
-| Sum must equal `n`        | Maintain a remaining target              |
-| Each number used once     | Move to `i + 1`                          |
-| Candidates are positive   | Prune candidates greater than the target |
-| Avoid duplicate orderings | Use a starting index                     |
-
----
-
-## Final Mental Model
+Recursive calls:
 
 ```text
-Start from 1
+kthGrammar(4, 5)
     ↓
-Choose a number
+kthGrammar(3, 3)
     ↓
-Subtract it from target
+kthGrammar(2, 2)
     ↓
-Move to the next number
-    ↓
-Have exactly k numbers?
-    ↓
-Yes → Is target zero?
-    ↓
-Yes → Save the combination
-    ↓
-Undo the choice
-    ↓
-Try another number
+kthGrammar(1, 1)
 ```
 
-**LeetCode 216 = Backtracking + Fixed Combination Size + Target Sum + No Reuse + Pruning**
+The base case returns `0`.
+
+Now evaluate the calls while returning:
+
+| Call               | Position | Operation           | Result |
+| ------------------ | -------: | ------------------- | -----: |
+| `kthGrammar(1, 1)` |        1 | Base case           |      0 |
+| `kthGrammar(2, 2)` |        2 | Flip the parent     |      1 |
+| `kthGrammar(3, 3)` |        3 | Preserve the parent |      1 |
+| `kthGrammar(4, 5)` |        5 | Preserve the parent |      1 |
+
+**Final answer: `1`**
+
+## 7. Complexity Analysis
+
+**Time Complexity:** `O(n)`
+
+Each recursive call decreases the row number by one until the base case is reached.
+
+**Auxiliary Space Complexity:** `O(n)`
+
+The recursion stack can contain up to `n` calls.
+
+## 8. Pattern Recognition
+
+When a sequence is recursively generated, ask:
+
+* Can I identify the parent of the required element?
+* Can I calculate the parent's position?
+* Can I determine the current element from the parent?
+
+If yes, try reducing the problem to a smaller input.
+
+For this problem:
+
+```text
+Find the k-th symbol
+        ↓
+Find its parent position
+        ↓
+Recursively solve the previous row
+        ↓
+Preserve or flip the parent's symbol
+        ↓
+Return the answer
+```
+
+## Final Takeaway
+
+**LeetCode 779 = Recursion + Parent Position + Odd/Even Rule**
+
+* Base case: `n == 1` returns `0`.
+* Parent position: `(k + 1) / 2`.
+* Odd `k`: return the parent.
+* Even `k`: return `1 - parent`.
