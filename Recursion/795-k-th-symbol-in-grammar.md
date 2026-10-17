@@ -110,24 +110,18 @@ This avoids constructing the entire sequence.
 
 ```java
 class Solution {
-
     public int kthGrammar(int n, int k) {
-
-        // Base case
-        if (n == 1) {
-            return 0;
+      return  kthGrammarhelper( n,  k,0);
+        
+    }
+    public int kthGrammarhelper(int n, int k,int flag){
+        if(n==1){
+            return flag%2==0? 0:1; // conditional that if flag is even keep it 0 and if one then flip it to 1
         }
-
-        // Find the parent symbol
-        int parent = kthGrammar(n - 1, (k + 1) / 2);
-
-        // Odd position preserves the parent's symbol
-        if (k % 2 == 1) {
-            return parent;
+        if(k%2==0){
+           return kthGrammarhelper(n-1,k/2,flag+1);
         }
-
-        // Even position flips the parent's symbol
-        return 1 - parent;
+         return kthGrammarhelper(n-1,(k+1)/2,flag);
     }
 }
 ```
