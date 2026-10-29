@@ -20,7 +20,7 @@ class Solution {
         long result = (half * half) % MOD;
 
         if (n % 2 == 1) {
-            result = (result * x) % MOD;
+            result = (half*half * x) % MOD;
         }
 
         return result;
