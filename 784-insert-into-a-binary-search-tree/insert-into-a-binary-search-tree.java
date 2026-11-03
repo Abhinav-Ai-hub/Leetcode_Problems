@@ -20,12 +20,12 @@ class Solution {
         }
         insertIntoBSThelper(root,val);
         return root;
-        
+
         
     }
     void insertIntoBSThelper(TreeNode root, int val){
         if(val<root.val){
-            if(root.left==null){
+            if(root.left==null){// we are checking beforehand about the availability of a node to the left or right of the current one here the current one is root.
                 root.left= new TreeNode(val);
                 return;
             }else{
