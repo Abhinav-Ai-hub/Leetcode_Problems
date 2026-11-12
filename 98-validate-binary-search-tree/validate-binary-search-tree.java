@@ -19,9 +19,7 @@ class Solution {
 
     }
      public boolean isValidBST(TreeNode root) {
-        if(root.left==null && root.right == null){
-            return true;
-        }
+
     
         return isValidBSThelper(root,null,null);
         
